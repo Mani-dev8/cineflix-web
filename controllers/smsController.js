@@ -8,87 +8,38 @@
 //     apiSecret: "32eY2vgP1fjYNQsc"
 // })
 
+const nodemailer = require("nodemailer");
 
 const newSmsSend = async (req, res) => {
-    // try {
-    //     // const { phone, number } = req.body;
-    //     // const from = "+918169363402"
-    //     // const to = `+91${phone}`
-    //     // const text = `Your 6 digit OTP verification number is ${number}`
 
-    //     // await vonage.sms.send({ to, from, text })
-    //     //     .then(resp => { res.status(200).json({ message: 'Message sent successfully' }); console.log(resp); })
-    //     //     .catch(err => { console.log('There was an error sending the messages.'); console.error(err); }); 
+  //===========================================
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    auth: {
+      user: "manishsewamahto090802@gmail.com",
+      pass: "zqoyysujiqheggel",
+    },
+  });
 
-    //     var nodemailer = require('nodemailer');
+  await new Promise((resolve, reject) => {
+    // verify connection configuration
+    transporter.verify(function (error, success) {
+      if (error) {
+        console.log(error);
+        reject(error);
+      } else {
+        console.log("Server is ready to take our messages");
+        resolve(success);
+      }
+    });
+  });
+  const { email, number, userName } = req.body;
 
-    //     const transporter = nodemailer.createTransport({
-    //         host: 'smtp.ethereal.email',
-    //         port: 587,
-    //         auth: {
-    //             user: 'mackenzie.carter77@ethereal.email',
-    //             pass: 'kETT4wpXQyhYGTfFmB'
-    //         }
-    //     });
-
-    //     var mailOptions = {
-    //         from: 'mackenzie.carter77@ethereal.email',
-    //         to: 'manishsewamahto090802@gmail.com',
-    //         subject: 'Sending Email using Node.js',
-    //         text: 'That was easy!'
-    //     };
-
-    //     transporter.sendMail(mailOptions, function (error, info) {
-    //         if (error) {
-    //             console.log(error);
-    //         } else {
-    //             console.log('Email sent: ' + info.response);
-    //             res.status(200).json({message:"sent successfully"})
-    //         }
-    //     });
-    // } catch (error) {
-    //     console.log('error while send sms', error)
-    //     res.status(500).json({ message: "Error in sending   email" })
-    // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    const nodemailer = require("nodemailer");
-
-    // async..await is not allowed in global scope, must use a wrapper
-    async function main() {
-        // Generate test SMTP service account from ethereal.email
-        // Only needed if you don't have a real mail account for testing
-        let testAccount = await nodemailer.createTestAccount();
-
-        // create reusable transporter object using the default SMTP transport
-        let transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            // port: 587,
-            // secure: false, // true for 465, false for other ports
-            auth: {
-                user: 'manishsewamahto090802@gmail.com',
-                pass: 'zqoyysujiqheggel'// generated ethereal password
-            },
-        });
-        const { email, number, userName } = req.body;
-        // send mail with defined transport object
-        let info = await transporter.sendMail({
-            from: 'manishsewamahto090802@gmail.com',
-            to: `${email}`,
-            subject: 'Email verification.',
-            html: `<!DOCTYPE html>
+  const mailData = {
+    from: "manishsewamahto090802@gmail.com",
+    to: email,
+    subject: `CineFlix OTP verification`,
+    html: `<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -169,21 +120,28 @@ const newSmsSend = async (req, res) => {
 </body>
 
 </html>
-`
-        }).then(res.status(200).json({ message: "email send successfully" })).catch(error => res.status(400).json({ message: error }));
+`,
+  };
 
-        console.log("Message sent: %s", info.messageId);
-        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+  await new Promise((resolve, reject) => {
+    // send mail
+    transporter.sendMail(mailData, (err, info) => {
+      if (err) {
+        console.error(err);
+        reject(err);
+      } else {
+        console.log(info);
+        resolve(info);
+      }
+    });
+  });
+  res.status(200).json({ status: "OK" });
 
-        // Preview only available when sending through an Ethereal account
-        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-        // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-    }
 
-    main().catch(console.error);
+  //=============================================
 
 }
 module.exports = {
-    newSmsSend
+  newSmsSend
 }
 
